@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, cn } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useStatsStore } from '../store/statsStore';
-import { Coins, Palette, Award, CheckCircle2, Plus, ShoppingBag, Briefcase, Gem, Crown, Zap, Shield, Flame } from 'lucide-react';
+import { Coins, Palette, Award, CheckCircle2, ShoppingBag, Briefcase, Gem, Crown, Zap, Shield, Flame } from 'lucide-react';
 import type { ShopItem } from '../types';
 import { SkinPreview } from '../components/SkinPreview';
 import { Link } from 'react-router-dom';
@@ -29,7 +29,7 @@ const TITLE_ICONS: Record<string, any> = {
 };
 
 export const ShopPage: React.FC = () => {
-  const { coins, ownedSkins, activeSkin, ownedTitles, activeTitle, buyItem, selectSkin, selectTitle, addCoins } = useStatsStore();
+  const { coins, ownedSkins, activeSkin, ownedTitles, activeTitle, buyItem, selectSkin, selectTitle } = useStatsStore();
 
   const handlePurchase = (item: ShopItem) => {
     if (buyItem(item)) {

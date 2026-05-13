@@ -133,7 +133,7 @@ export const LearnModePage: React.FC = () => {
               <SudokuBoard />
             </div>
             <div className="w-full flex flex-col bg-surface/90 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-border/90 shadow-md gap-2 sm:gap-3 mt-5 sm:mt-6">
-              <GameControls hideWinDev />
+              <GameControls />
               <NumberPad />
             </div>
           </div>
