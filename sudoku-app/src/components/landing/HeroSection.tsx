@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // Highlighted cells to show active state
