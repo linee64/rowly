@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-gold: var(--accent-gold);
+  --color-gold-hover: var(--accent-gold-hover);
+  --color-gold-muted: var(--accent-gold-muted);
+  --color-tx-primary: var(--text-primary);
+  --color-tx-secondary: var(--text-secondary);
+  --color-tx-muted: var(--text-muted);
+  --color-border: var(--border-color);
+  --color-error: var(--error);
+  --color-success: var(--success);
+  --color-info: var(--info);
+
+  /* Landing Colors */
+  --color-landing-gold: #CFA430;
+  --color-landing-gold-light: #E3CA86;
+  --color-landing-cream: #F1E6C5;
+  --color-landing-brown-dark: #5F4C16;
+  --color-landing-obsidian: #151005;
+  --color-landing-obsidian-2: #1C1508;
+  --color-landing-obsidian-3: #241C09;
+
+  --font-display: "Playfair Display", serif;
+  --font-sans: "DM Sans", sans-serif;
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+:root {
+  /* Light Theme */
+  --bg-primary: #f5f3ed;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ede9df;
+  --accent-gold: #b8960e;
+  --accent-gold-hover: #9c7f0a;
+  --accent-gold-muted: #d6c581;
+  --text-primary: #1a1810;
+  --text-secondary: #5a4f2e;
+  --text-muted: #8c8266;
+  --border-color: #d4c99a;
+  --error: #c0392b;
+  --success: #27ae60;
+  --info: #2980b9;
+}
+
+html.dark {
+  /* Dark Theme */
+  --bg-primary: #111110;
+  --bg-surface: #1c1c1a;
+  --bg-elevated: #252523;
+  --accent-gold: #c9a84c;
+  --accent-gold-hover: #e0b84e;
+  --accent-gold-muted: #8a6f2e;
+  --text-primary: #f0ece0;
+  --text-secondary: #9a9080;
+  --text-muted: #5a5448;
+  --border-color: #2e2c26;
+  --error: #c0392b;
+  --success: #27ae60;
+  --info: #2980b9;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+@layer base {
+  /* Custom Scrollbar Styles */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-gold-muted);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-primary);
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
