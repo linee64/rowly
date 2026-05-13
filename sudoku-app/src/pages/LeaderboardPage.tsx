@@ -209,23 +209,28 @@ export const LeaderboardPage: React.FC = () => {
                 filteredEntries.slice(0, 50).map((entry, index) => (
                 <tr 
                   key={`${entry.id}-${index}`} 
-                  className={`border-b border-border/50 last:border-0 hover:bg-elevated/30 transition-colors ${
-                    entry.isCurrentUser ? 'bg-gold/5 border-gold/20' : ''
+                  className={`border-b border-border/50 last:border-0 transition-all duration-300 ${
+                    entry.isCurrentUser 
+                      ? 'bg-gold/10 border-l-4 border-l-gold border-b-gold/20 shadow-[inset_0_0_20px_rgba(212,175,55,0.05)]' 
+                      : 'hover:bg-elevated/30'
                   }`}
                 >
                   <td className="px-6 py-4">
                     <div className={`font-bold text-lg ${
                       index === 0 ? 'text-gold' : 
                       index === 1 ? 'text-tx-secondary' : 
-                      index === 2 ? 'text-[#cd7f32]' : 'text-tx-muted'
+                      index === 2 ? 'text-[#cd7f32]' : 
+                      entry.isCurrentUser ? 'text-gold' : 'text-tx-muted'
                     }`}>
                       #{index + 1}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden ${
-                        entry.isCurrentUser ? 'bg-gold text-[#111110]' : 'bg-elevated text-tx-secondary'
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden border-2 ${
+                        entry.isCurrentUser 
+                          ? 'bg-gold text-[#111110] border-gold shadow-[0_0_10px_rgba(212,175,55,0.3)]' 
+                          : 'bg-elevated text-tx-secondary border-border'
                       }`}>
                         {entry.avatarUrl ? (
                           <img src={entry.avatarUrl} alt={entry.initials} className="w-full h-full object-cover" />
@@ -233,8 +238,17 @@ export const LeaderboardPage: React.FC = () => {
                           entry.initials
                         )}
                       </div>
-                      <div className={`${entry.isCurrentUser ? 'text-gold' : 'text-tx-primary'}`}>
-                        {renderName(entry)}
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <div className={`${entry.isCurrentUser ? 'text-gold font-extrabold' : 'text-tx-primary font-bold'}`}>
+                            {renderName(entry)}
+                          </div>
+                          {entry.isCurrentUser && (
+                            <span className="bg-gold text-[#111110] text-[10px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter shadow-sm animate-pulse">
+                              You
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </td>

@@ -39,8 +39,8 @@ export const PuzzlesPage: React.FC = () => {
         // Diagonal Staircase
         const row = Math.floor(i / 3);
         const col = i % 3;
-        const x = 15 + col * 35;
-        const y = 5 + row * 12;
+        const x = 20 + col * 30;
+        const y = 8 + row * 13;
         return { x, y };
       }
       case 'hard': {
@@ -48,20 +48,20 @@ export const PuzzlesPage: React.FC = () => {
         const col = Math.floor(i / 5);
         const isTopToBottom = col % 2 === 0;
         const row = isTopToBottom ? i % 5 : 4 - (i % 5);
-        const x = 10 + col * 25;
-        const y = 5 + row * 20;
+        const x = 15 + col * 23;
+        const y = 8 + row * 18;
         return { x, y };
       }
       case 'expert': {
-        // Scattered / Random-ish layout
+        // More spaced out scattered layout
         const positions = [
-          { x: 50, y: 5 }, { x: 20, y: 15 }, { x: 80, y: 15 },
-          { x: 50, y: 25 }, { x: 10, y: 35 }, { x: 90, y: 35 },
-          { x: 50, y: 45 }, { x: 20, y: 55 }, { x: 80, y: 55 },
-          { x: 50, y: 65 }, { x: 10, y: 75 }, { x: 90, y: 75 },
-          { x: 50, y: 85 }, { x: 20, y: 95 }, { x: 80, y: 95 },
-          { x: 50, y: 105 }, { x: 10, y: 115 }, { x: 90, y: 115 },
-          { x: 50, y: 125 }, { x: 20, y: 135 }
+          { x: 50, y: 5 }, { x: 20, y: 12 }, { x: 80, y: 12 },
+          { x: 50, y: 20 }, { x: 10, y: 28 }, { x: 90, y: 28 },
+          { x: 50, y: 36 }, { x: 20, y: 44 }, { x: 80, y: 44 },
+          { x: 50, y: 52 }, { x: 10, y: 60 }, { x: 90, y: 60 },
+          { x: 50, y: 68 }, { x: 20, y: 76 }, { x: 80, y: 76 },
+          { x: 50, y: 84 }, { x: 10, y: 92 }, { x: 90, y: 92 },
+          { x: 50, y: 96 }, { x: 25, y: 100 }
         ];
         return positions[i % positions.length];
       }
@@ -70,8 +70,8 @@ export const PuzzlesPage: React.FC = () => {
         const isLeftToRight = Math.floor(i / 5) % 2 === 0;
         const row = Math.floor(i / 5);
         const col = isLeftToRight ? i % 5 : 4 - (i % 5);
-        const x = 10 + col * 20;
-        const y = 5 + row * 15;
+        const x = 12 + col * 19;
+        const y = 8 + row * 22;
         return { x, y };
       }
     }
@@ -100,10 +100,21 @@ export const PuzzlesPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex-1 relative bg-surface/30 rounded-2xl border border-border overflow-hidden p-8 flex justify-center py-20">
-        <div className="relative w-full max-w-md">
+      <div className="flex-1 relative bg-surface/30 rounded-2xl border border-border overflow-hidden p-4 md:p-8 flex justify-center py-10 md:py-20 overflow-y-auto">
+        <div 
+          className="relative w-full max-w-md"
+          style={{ 
+            minHeight: filter === 'expert' ? '120rem' : 
+                       filter === 'medium' ? '90rem' : 
+                       filter === 'hard' ? '75rem' : '55rem' 
+          }}
+        >
           {/* SVG Path connecting the nodes */}
-          <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 0, pointerEvents: 'none' }}>
+          <svg 
+            className="absolute inset-0 w-full h-full" 
+            style={{ zIndex: 0, pointerEvents: 'none' }}
+            preserveAspectRatio="none"
+          >
             {catalog.map((_, i) => {
               if (i === catalog.length - 1) return null;
               
@@ -120,8 +131,8 @@ export const PuzzlesPage: React.FC = () => {
                   x2={`${pos2.x}%`}
                   y2={`${pos2.y}%`}
                   stroke={isCompletedPath ? '#22c55e' : '#3f3f46'}
-                  strokeWidth="4"
-                  strokeDasharray={isCompletedPath ? 'none' : '8 8'}
+                  strokeWidth="3"
+                  strokeDasharray={isCompletedPath ? 'none' : '6 6'}
                   className="transition-colors duration-500"
                 />
               );
@@ -129,7 +140,7 @@ export const PuzzlesPage: React.FC = () => {
           </svg>
 
           {/* Nodes */}
-          <div className="relative z-10 w-full h-full" style={{ minHeight: `${Math.ceil(catalog.length / (filter === 'medium' ? 3 : 5)) * 15}rem` }}>
+          <div className="relative z-10 w-full h-full">
             {catalog.map((puzzle, i) => {
               const pos = getNodePosition(i, filter);
 
@@ -151,7 +162,7 @@ export const PuzzlesPage: React.FC = () => {
                     }}
                     disabled={isLocked && !puzzle.isCompleted}
                     className={clsx(
-                      "w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 border-4 relative",
+                      "w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-300 border-2 md:border-4 relative",
                       puzzle.isCompleted 
                         ? "bg-success text-[#111110] border-success hover:scale-110 shadow-[0_0_15px_rgba(34,197,94,0.5)]" 
                         : isCurrent
@@ -160,16 +171,16 @@ export const PuzzlesPage: React.FC = () => {
                     )}
                   >
                     {puzzle.isCompleted ? (
-                      <Check className="w-6 h-6" strokeWidth={3} />
+                      <Check className="w-4 h-4 md:w-6 md:h-6" strokeWidth={3} />
                     ) : isLocked ? (
-                      <Lock className="w-5 h-5 opacity-50" />
+                      <Lock className="w-3 h-3 md:w-5 md:h-5 opacity-50" />
                     ) : (
-                      <Star className="w-6 h-6 fill-current" />
+                      <Star className="w-4 h-4 md:w-6 md:h-6 fill-current" />
                     )}
                     
                     {/* Level Number Tooltip/Label */}
-                    <span className="absolute -bottom-8 text-sm font-semibold text-tx-secondary whitespace-nowrap bg-elevated px-2 py-1 rounded-md border border-border">
-                      Level {puzzle.number}
+                    <span className="absolute -bottom-6 md:bottom-[-2.5rem] text-[10px] md:text-sm font-semibold text-tx-secondary whitespace-nowrap bg-elevated px-1.5 md:px-2 py-0.5 md:py-1 rounded-md border border-border shadow-sm">
+                      Lvl {puzzle.number}
                     </span>
                   </button>
                 </div>
