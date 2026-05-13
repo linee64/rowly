@@ -47,15 +47,6 @@ export const ShopPage: React.FC = () => {
           <p className="text-tx-secondary">Customize your experience with exclusive skins and titles.</p>
         </div>
         <div className="flex items-center space-x-3">
-          {/* Debug/Cheat Button */}
-          <button 
-            onClick={() => addCoins(1000)}
-            className="p-2 bg-success/10 text-success rounded-xl border border-success/20 hover:bg-success/20 transition-colors"
-            title="Add 1000 coins (Testing Mode)"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
-          
           <div className="bg-surface border border-gold/20 px-6 py-3 rounded-2xl flex items-center shadow-lg shadow-gold/5">
             <Coins className="w-6 h-6 text-gold mr-3 fill-current" />
             <span className="text-2xl font-mono font-bold text-gold">{coins}</span>

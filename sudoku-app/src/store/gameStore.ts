@@ -21,7 +21,6 @@ interface GameStore extends GameState {
   updateElapsedTime: () => void;
   clearGame: () => void;
   buyExtraLife: () => boolean;
-  autoCompleteForTesting: () => void;
 }
 
 const createEmptyBoard = (): Cell[][] => 
@@ -174,6 +173,17 @@ export const useGameStore = create<GameStore>()(
         const state = get();
         if (state.isComplete || state.isPaused || state.isGameOver || !state.selectedCell) return;
         
+        // Limit to 3 hints per game
+        if (state.hintsUsed >= 3) {
+          set({
+            coachMessage: {
+              text: "У вас закончились подсказки на эту игру! 💡",
+              type: 'error'
+            }
+          });
+          return;
+        }
+
         const [r, c] = state.selectedCell;
         const cell = state.board[r][c];
         
@@ -197,12 +207,11 @@ export const useGameStore = create<GameStore>()(
           coachMessage: null
         });
       },
-
+      
       askCoach: async () => {
         const state = get();
         if (state.isComplete || state.isPaused || state.isGameOver) return;
 
-        // Покажем пользователю, что мы думаем
         set({
           coachMessage: {
             text: "Думаю... Запрашиваю совет у Gemini 🧠",
@@ -250,27 +259,6 @@ export const useGameStore = create<GameStore>()(
         }
         return false;
       },
-      
-      autoCompleteForTesting: () => {
-        const state = get();
-        if (state.isComplete || state.isGameOver) return;
-        
-        const newBoard = state.board.map((row, r) => 
-          row.map((cell, c) => ({
-            ...cell,
-            value: state.solution[r][c],
-            isError: false,
-            notes: new Set<number>()
-          }))
-        );
-
-        set({
-          board: newBoard,
-          isComplete: true,
-          history: [...state.history, state.board.map(row => row.map(c => ({...c, notes: new Set(c.notes)})))],
-          coachMessage: null
-        });
-      }
     }),
     {
       name: 'sudoku-game-storage',
