@@ -22,6 +22,7 @@ interface GameStore extends GameState {
   updateElapsedTime: () => void;
   clearGame: () => void;
   buyExtraLife: () => boolean;
+  autoCompleteForTesting: () => void;
 }
 
 const createEmptyBoard = (): Cell[][] => 
@@ -198,27 +199,28 @@ export const useGameStore = create<GameStore>()(
         });
       },
 
-      askCoach: () => {
+      askCoach: async () => {
         const state = get();
-        if (state.isComplete || state.isPaused || state.isGameOver || !state.selectedCell) return;
+        if (state.isComplete || state.isPaused || state.isGameOver) return;
 
-        const [r, c] = state.selectedCell;
-        const cell = state.board[r][c];
+        // Покажем пользователю, что мы думаем
+        set({
+          coachMessage: {
+            text: "Думаю... Запрашиваю совет у Gemini 🧠",
+            type: 'hint'
+          }
+        });
 
-        if (cell.isGiven || (cell.value !== 0 && cell.value === state.solution[r][c])) {
-          set({
-            coachMessage: {
-              text: "Эта ячейка уже заполнена верно! Выбери пустую ячейку, чтобы получить совет.",
-              type: 'hint'
-            }
-          });
-          return;
-        }
+        const { getGeminiAdvice } = await import('../utils/aiCoach');
+        const advice = await getGeminiAdvice(state.board, state.mistakes, state.difficulty);
 
-        const solutionValue = state.solution[r][c];
-        const explanation = explainNextMove(state.board, r, c, solutionValue);
-
-        set({ coachMessage: explanation });
+        set({
+          coachMessage: {
+            text: advice,
+            type: 'strategy',
+            strategyName: 'Gemini 2.5 Flash'
+          }
+        });
       },
 
       clearCoachMessage: () => set({ coachMessage: null }),
@@ -248,6 +250,27 @@ export const useGameStore = create<GameStore>()(
           return true;
         }
         return false;
+      },
+      
+      autoCompleteForTesting: () => {
+        const state = get();
+        if (state.isComplete || state.isGameOver) return;
+        
+        const newBoard = state.board.map((row, r) => 
+          row.map((cell, c) => ({
+            ...cell,
+            value: state.solution[r][c],
+            isError: false,
+            notes: new Set<number>()
+          }))
+        );
+
+        set({
+          board: newBoard,
+          isComplete: true,
+          history: [...state.history, state.board.map(row => row.map(c => ({...c, notes: new Set(c.notes)})))],
+          coachMessage: null
+        });
       }
     }),
     {

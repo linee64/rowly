@@ -74,18 +74,18 @@ export const SudokuBoard: React.FC = () => {
                       cell.value === board[selectedCell[0]][selectedCell[1]].value;
 
     return cn(
-      'w-full h-full flex items-center justify-center text-xl sm:text-2xl transition-all cursor-pointer select-none active:scale-95 touch-manipulation',
+      'w-full h-full flex items-center justify-center text-xl sm:text-2xl transition-all cursor-pointer select-none active:scale-95 touch-manipulation relative',
       cell.isGiven ? `font-bold ${skin.given}` : `font-medium ${skin.user}`,
       cell.isError && !cell.isGiven ? 'bg-error/20 text-error' : '',
       hasConflict ? 'bg-error/10 text-error' : '',
       isSelected ? `border-2 outline-none z-10 scale-105 sm:scale-110 shadow-xl ${skin.selected}` : `border ${skin.cell}`,
-      isGlobalHighlight && !cell.isError && !hasConflict ? 'bg-gold/5' : '',
-      isSameValue && !isSelected && !cell.isError && !hasConflict ? 'bg-gold/10' : '',
+      isGlobalHighlight && !cell.isError && !hasConflict ? 'after:absolute after:inset-0 after:bg-gold/10 after:pointer-events-none' : '',
+      isSameValue && !isSelected && !cell.isError && !hasConflict ? 'after:absolute after:inset-0 after:bg-gold/20 after:pointer-events-none' : '',
       // Add thick borders for 3x3 boxes
-      c % 3 === 0 ? `border-l-2 ${skin.thickBorder}` : '',
-      c === 8 ? `border-r-2 ${skin.thickBorder}` : '',
-      r % 3 === 0 ? `border-t-2 ${skin.thickBorder}` : '',
-      r === 8 ? `border-b-2 ${skin.thickBorder}` : ''
+      c % 3 === 0 ? `border-l-[3px] ${skin.thickBorder}` : '',
+      c === 8 ? `border-r-[3px] ${skin.thickBorder}` : '',
+      r % 3 === 0 ? `border-t-[3px] ${skin.thickBorder}` : '',
+      r === 8 ? `border-b-[3px] ${skin.thickBorder}` : ''
     );
   };
 
@@ -98,7 +98,7 @@ export const SudokuBoard: React.FC = () => {
   }
 
   return (
-    <div className={cn("w-full aspect-square max-w-[600px] mx-auto border-2 rounded-xl overflow-hidden relative", skin.board)}>
+    <div className={cn("w-full aspect-square max-w-[600px] mx-auto border-[3px] rounded-xl overflow-hidden relative", skin.board)}>
       <div className="grid grid-cols-9 grid-rows-9 w-full h-full">
         {board.map((row, r) =>
           row.map((cell, c) => (
@@ -108,9 +108,9 @@ export const SudokuBoard: React.FC = () => {
               onClick={() => selectCell(r, c)}
             >
               {cell.value !== 0 ? (
-                <span>{cell.value}</span>
+                <span className="relative z-10">{cell.value}</span>
               ) : (
-                <div className="grid grid-cols-3 grid-rows-3 w-full h-full p-0.5">
+                <div className="grid grid-cols-3 grid-rows-3 w-full h-full p-0.5 relative z-10">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
                     <div key={n} className="flex items-center justify-center">
                       {cell.notes.has(n) && (

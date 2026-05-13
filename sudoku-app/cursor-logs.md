@@ -24,8 +24,16 @@
 
 **Status**: Ready for use. Dev server is running.
 
-## 2026-05-13
-### Rebranding & UI Revert
+##### 2026-05-13 Updates (Leaderboard Sync & Sudoku Board UI)
+- **Leaderboard Enhancements**: Extracted leaderboard fetching logic into a `fetchLeaderboard` function and added a manual "Sync" button to the `LeaderboardPage` header. The button allows users to manually trigger data sync from Supabase without refreshing the page.
+- **AI Coach Enhancement**: Replaced the static rule-based AI Coach with Google's **Gemini 2.5 Flash** model. 
+  - Installed `@google/generative-ai` package.
+  - Updated `aiCoach.ts` to construct a string representation of the board and prompt Gemini for a strategic, non-direct hint in Russian.
+  - Updated `gameStore.ts` `askCoach` method to be asynchronous and display a loading state ("Думаю...") while waiting for the API response.
+- **Database Schema**: Created `supabase-schema.sql` file containing the DDL for the `leaderboard` table, including UUID generation, Row Level Security (RLS) policies for anonymous read/write access, and performance indexes. Added `avatar_url` column to support profile pictures.
+- **Leaderboard Avatars**: 
+  - Updated `LeaderboardPage.tsx` to render user avatars from Supabase (`avatar_url`) or local storage, falling back to initials if none exist.
+  - Updated `statsStore.ts` to include the user's `avatarUrl` when submitting a new score to the `leaderboard` table in Supabase.
 - **Profile & Settings Enhancements**: Added a "Back" button to the Profile and Settings pages for improved navigation.
 - **Name Change System Fix**: Increased the name change limit from 1 to 3 and updated the UI to prevent users from being locked out of name changes due to local storage persistence across sessions.
 - **Avatar System**: Added a curated set of 6 friendly "Big Smile" cartoon avatars to `ProfilePage.tsx`.

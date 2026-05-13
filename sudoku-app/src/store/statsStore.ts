@@ -127,6 +127,7 @@ export const useStatsStore = create<StatsStore>()(
                 player_name: displayName,
                 time_seconds: game.timeSeconds,
                 difficulty: game.difficulty,
+                avatar_url: state.avatarUrl,
                 // created_at is automatically handled by Supabase default values
               }
             ]);

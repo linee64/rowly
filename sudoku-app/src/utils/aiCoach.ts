@@ -1,5 +1,6 @@
 import type { CellValue, Cell } from '../types';
 import { isValidPlacement } from './sudokuValidator';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface CoachExplanation {
   text: string;
@@ -7,6 +8,11 @@ export interface CoachExplanation {
   strategyName?: string;
   highlightCells?: [number, number][];
 }
+
+// Инициализация Gemini API (используем VITE_GEMINI_API_KEY из .env)
+// Для продакшена лучше выносить ключи на бэкенд, но для текущей архитектуры оставляем на фронте
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 /**
  * Объясняет, почему цифра не может быть поставлена в данную ячейку.
@@ -127,9 +133,54 @@ export const explainNextMove = (
       strategyName: 'Hidden Single (Column)'
     };
   }
-
+  
   return {
     text: `ИИ-Тренер советует поставить сюда ${solutionValue}. Попробуй проанализировать окружающие ячейки, чтобы понять, почему это единственный верный вариант!`,
     type: 'hint'
   };
+};
+
+/**
+ * Запрашивает подсказку у Gemini AI для текущего состояния доски
+ */
+export const getGeminiAdvice = async (
+  board: Cell[][],
+  mistakes: number,
+  difficulty: string
+): Promise<string> => {
+  if (!API_KEY) {
+    return "API ключ для Gemini не настроен. Добавь VITE_GEMINI_API_KEY в файл .env.";
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Используем 2.5 flash
+
+    // Подготавливаем строковое представление доски для AI
+    let boardString = "Текущая доска судоку (0 - пустая ячейка):\n";
+    for (let r = 0; r < 9; r++) {
+      let row = "";
+      for (let c = 0; c < 9; c++) {
+        row += board[r][c].value + " ";
+      }
+      boardString += row.trim() + "\n";
+    }
+
+    const prompt = `
+Ты опытный тренер по игре Судоку. Твоя задача - дать короткий, поддерживающий и обучающий совет игроку.
+Игрок играет на сложности: ${difficulty}. Текущее количество ошибок: ${mistakes}/3.
+
+${boardString}
+
+Проанализируй доску и дай один конкретный совет:
+1. Обрати внимание игрока на строку, столбец или квадрат 3x3, где осталось мало пустых ячеек (1-3 штуки), и посоветуй сфокусироваться там.
+2. Не давай прямых ответов (например, "поставь 5 в левый верхний угол"), а направляй мысль.
+3. Ответ должен быть на русском языке, дружелюбным и коротким (максимум 2-3 предложения).
+`;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "Хмм, мои нейронные сети сейчас перегружены. Но я вижу, что ты справляешься! Попробуй поискать блоки 3x3, где не хватает всего пары цифр.";
+  }
 };

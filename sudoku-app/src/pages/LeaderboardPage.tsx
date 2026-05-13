@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useStatsStore } from '../store/statsStore';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { Trophy, Loader2, Award } from 'lucide-react';
+import { Trophy, Loader2, Award, RefreshCw } from 'lucide-react';
 import type { Difficulty } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -15,79 +15,92 @@ interface LeaderboardEntry {
   difficulty: Difficulty;
   date: string;
   isCurrentUser: boolean;
+  avatarUrl?: string | null;
 }
 
 export const LeaderboardPage: React.FC = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [filter, setFilter] = useState<Difficulty | 'all'>('all');
   const [isLoading, setIsLoading] = useState(true);
-  const { completedGames, activeTitle, playerName } = useStatsStore();
+  const [isSyncing, setIsSyncing] = useState(false);
+  const { completedGames, activeTitle, playerName, avatarUrl } = useStatsStore();
+
+  const fetchLeaderboard = useCallback(async (manualSync = false) => {
+    if (manualSync) {
+      setIsSyncing(true);
+    } else {
+      setIsLoading(true);
+    }
+    
+    let dbEntries: LeaderboardEntry[] = [];
+    
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('leaderboard')
+          .select('*')
+          .order('time_seconds', { ascending: true })
+          .limit(100);
+          
+        if (!error && data) {
+          dbEntries = data.map(row => {
+            const name = row.player_name || 'Anonymous';
+            return {
+              id: row.id,
+              name: name,
+              initials: name.substring(0, 2).toUpperCase(),
+              timeSeconds: row.time_seconds,
+              difficulty: row.difficulty as Difficulty,
+              date: row.created_at,
+              isCurrentUser: name === playerName || name.includes(playerName),
+              avatarUrl: row.avatar_url,
+            };
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching from supabase:", err);
+      }
+    }
+    
+    // If DB is empty or fails, we only show local user's data
+    // Otherwise, we merge and sort
+    
+    const realEntries: LeaderboardEntry[] = completedGames.map(game => ({
+      id: game.puzzleId,
+      name: activeTitle ? `${activeTitle} ${playerName}` : playerName,
+      initials: playerName.substring(0, 2).toUpperCase(),
+      timeSeconds: game.timeSeconds,
+      difficulty: game.difficulty,
+      date: game.completedAt,
+      isCurrentUser: true,
+      avatarUrl: avatarUrl,
+    }));
+
+    // Combine DB entries with any local games that might not be synced yet
+    // Removing duplicates by name and time for simplicity
+    const combined = [...dbEntries];
+    
+    realEntries.forEach(localEntry => {
+      const alreadyExists = combined.some(dbEntry => 
+        dbEntry.name === localEntry.name && dbEntry.timeSeconds === localEntry.timeSeconds
+      );
+      if (!alreadyExists) {
+        combined.push(localEntry);
+      }
+    });
+    
+    setEntries(combined.sort((a, b) => a.timeSeconds - b.timeSeconds));
+    
+    if (manualSync) {
+      setIsSyncing(false);
+    } else {
+      setIsLoading(false);
+    }
+  }, [completedGames, activeTitle, playerName, avatarUrl]);
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      setIsLoading(true);
-      
-      let dbEntries: LeaderboardEntry[] = [];
-      
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('leaderboard')
-            .select('*')
-            .order('time_seconds', { ascending: true })
-            .limit(100);
-            
-          if (!error && data) {
-            dbEntries = data.map(row => {
-              const name = row.player_name || 'Anonymous';
-              return {
-                id: row.id,
-                name: name,
-                initials: name.substring(0, 2).toUpperCase(),
-                timeSeconds: row.time_seconds,
-                difficulty: row.difficulty as Difficulty,
-                date: row.created_at,
-                isCurrentUser: name === playerName || name.includes(playerName),
-              };
-            });
-          }
-        } catch (err) {
-          console.error("Error fetching from supabase:", err);
-        }
-      }
-      
-      // If DB is empty or fails, we only show local user's data
-      // Otherwise, we merge and sort
-      
-      const realEntries: LeaderboardEntry[] = completedGames.map(game => ({
-        id: game.puzzleId,
-        name: activeTitle ? `${activeTitle} ${playerName}` : playerName,
-        initials: playerName.substring(0, 2).toUpperCase(),
-        timeSeconds: game.timeSeconds,
-        difficulty: game.difficulty,
-        date: game.completedAt,
-        isCurrentUser: true,
-      }));
-
-      // Combine DB entries with any local games that might not be synced yet
-      // Removing duplicates by name and time for simplicity
-      const combined = [...dbEntries];
-      
-      realEntries.forEach(localEntry => {
-        const alreadyExists = combined.some(dbEntry => 
-          dbEntry.name === localEntry.name && dbEntry.timeSeconds === localEntry.timeSeconds
-        );
-        if (!alreadyExists) {
-          combined.push(localEntry);
-        }
-      });
-      
-      setEntries(combined.sort((a, b) => a.timeSeconds - b.timeSeconds));
-      setIsLoading(false);
-    };
-
     fetchLeaderboard();
-  }, [completedGames, activeTitle, playerName]);
+  }, [fetchLeaderboard]);
 
   const filteredEntries = entries.filter(e => filter === 'all' || e.difficulty === filter);
 
@@ -98,26 +111,32 @@ export const LeaderboardPage: React.FC = () => {
   };
 
   const renderName = (entry: LeaderboardEntry) => {
-    if (entry.name.includes(' ')) {
-      const parts = entry.name.split(' ');
-      const title = parts[0];
-      const name = parts.slice(1).join(' ');
-      
-      // Check if title is one of our shop titles
-      const isPrestige = ['Grandmaster', 'Ninja', 'King', 'Hero'].some(t => title.includes(t));
-      
-      if (isPrestige) {
-        return (
-          <div className="flex flex-col">
-            <span className="text-[10px] text-gold font-bold uppercase tracking-wider flex items-center">
-              <Award className="w-2 h-2 mr-1" />
-              {title}
-            </span>
-            <span className="font-bold">{name}</span>
-          </div>
-        );
+    // Check for prestige titles (handling both 1-word and 2-word titles)
+    const prestigeTitles = ['Grandmaster', 'Ninja', 'Logic King', 'Sudoku Hero'];
+    
+    let matchedTitle = '';
+    let remainingName = entry.name;
+
+    for (const title of prestigeTitles) {
+      if (entry.name.startsWith(title + ' ')) {
+        matchedTitle = title;
+        remainingName = entry.name.substring(title.length + 1);
+        break;
       }
     }
+    
+    if (matchedTitle) {
+      return (
+        <div className="flex flex-col">
+          <span className="text-[10px] text-gold font-bold uppercase tracking-wider flex items-center">
+            <Award className="w-2 h-2 mr-1" />
+            {matchedTitle}
+          </span>
+          <span className="font-bold">{remainingName}</span>
+        </div>
+      );
+    }
+    
     return <span className="font-bold">{entry.name}</span>;
   };
 
@@ -132,18 +151,31 @@ export const LeaderboardPage: React.FC = () => {
           <p className="text-tx-secondary mt-1">See how you stack up against the best.</p>
         </div>
         
-        <div className="flex space-x-2 bg-surface p-1 rounded-lg border border-border">
-          {(['all', 'easy', 'medium', 'hard', 'expert'] as const).map((diff) => (
-            <Button
-              key={diff}
-              variant={filter === diff ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter(diff)}
-              className="capitalize"
-            >
-              {diff}
-            </Button>
-          ))}
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => fetchLeaderboard(true)}
+            disabled={isSyncing || isLoading}
+            className="flex items-center w-full sm:w-auto"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+            Sync
+          </Button>
+          
+          <div className="flex space-x-2 bg-surface p-1 rounded-lg border border-border w-full sm:w-auto overflow-x-auto">
+            {(['all', 'easy', 'medium', 'hard', 'expert'] as const).map((diff) => (
+              <Button
+                key={diff}
+                variant={filter === diff ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setFilter(diff)}
+                className="capitalize whitespace-nowrap"
+              >
+                {diff}
+              </Button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -192,10 +224,14 @@ export const LeaderboardPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden ${
                         entry.isCurrentUser ? 'bg-gold text-[#111110]' : 'bg-elevated text-tx-secondary'
                       }`}>
-                        {entry.initials}
+                        {entry.avatarUrl ? (
+                          <img src={entry.avatarUrl} alt={entry.initials} className="w-full h-full object-cover" />
+                        ) : (
+                          entry.initials
+                        )}
                       </div>
                       <div className={`${entry.isCurrentUser ? 'text-gold' : 'text-tx-primary'}`}>
                         {renderName(entry)}

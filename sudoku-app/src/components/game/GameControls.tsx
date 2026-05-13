@@ -1,10 +1,10 @@
 import React from 'react';
-import { Undo, Eraser, Lightbulb, Pencil, GraduationCap } from 'lucide-react';
+import { Undo, Eraser, Lightbulb, Pencil, GraduationCap, Zap } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { Button } from '../ui/Button';
 
 export const GameControls: React.FC = () => {
-  const { undo, eraseCell, useHint, toggleNotesMode, isNotesMode, askCoach } = useGameStore();
+  const { undo, eraseCell, useHint, toggleNotesMode, isNotesMode, askCoach, autoCompleteForTesting } = useGameStore();
 
   const controls = [
     { icon: Undo, label: 'Undo', onClick: undo },
@@ -15,16 +15,22 @@ export const GameControls: React.FC = () => {
       onClick: toggleNotesMode,
       isActive: isNotesMode,
     },
+    { icon: Lightbulb, label: 'Hint', onClick: useHint },
     { 
       icon: GraduationCap, 
       label: 'Coach', 
       onClick: askCoach,
       isSpecial: true
     },
+    {
+      icon: Zap,
+      label: 'Win (Dev)',
+      onClick: autoCompleteForTesting,
+    }
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-1 sm:gap-2 w-full">
+    <div className="grid grid-cols-6 gap-1 sm:gap-2 w-full">
       {controls.map((ctrl, i) => (
         <Button
           key={i}
