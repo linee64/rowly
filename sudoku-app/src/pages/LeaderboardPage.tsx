@@ -52,7 +52,7 @@ export const LeaderboardPage: React.FC = () => {
               timeSeconds: row.time_seconds,
               difficulty: row.difficulty as Difficulty,
               date: row.created_at,
-              isCurrentUser: name === playerName || name.includes(playerName),
+              isCurrentUser: name === playerName || name.endsWith(' ' + playerName),
               avatarUrl: row.avatar_url,
             };
           });
