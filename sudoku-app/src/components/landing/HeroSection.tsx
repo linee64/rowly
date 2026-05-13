@@ -172,9 +172,6 @@ const HeroSection = () => {
             <Link to="/register" className="btn-primary flex items-center gap-2">
               Start Playing Free
             </Link>
-            <button className="btn-ghost flex items-center gap-2">
-              <Play size={18} fill="currentColor" /> Watch Demo
-            </button>
           </motion.div>
 
           <motion.div 
