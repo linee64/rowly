@@ -6,7 +6,7 @@ import { Trophy, Zap, Star, Shield, Target, Award, Crown } from 'lucide-react';
 import type { Difficulty } from '../types';
 
 export const StatsPage: React.FC = () => {
-  const { gamesPlayed, bestTimes, currentStreak, bestStreak, totalMistakes, totalHintsUsed, achievements, completedGames } = useStatsStore();
+  const { gamesPlayed, bestTimes, currentStreak, bestStreak, achievements, completedGames } = useStatsStore();
 
   const totalGames = Object.values(gamesPlayed).reduce((a, b) => a + b, 0);
   const winRate = totalGames > 0 ? 100 : 0; // In this app, games are only recorded when won

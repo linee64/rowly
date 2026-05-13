@@ -6,7 +6,7 @@ import { useGameStore } from '../store/gameStore';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Moon, Sun, Trash2, Save, RotateCcw, ArrowLeft } from 'lucide-react';
+import { Moon, Sun, Trash2, ArrowLeft } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();

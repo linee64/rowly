@@ -103,47 +103,54 @@ export const LearnModePage: React.FC = () => {
   if (!puzzleId) return null;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] md:min-h-screen p-2 sm:p-4 md:p-6 w-full overflow-x-hidden">
-      <div className="max-w-6xl mx-auto flex flex-col gap-4">
-        <header className="flex flex-wrap items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="-ml-2">
-            <ChevronLeft className="w-5 h-5 mr-1" />
+    <div className="min-h-0 flex-1 w-full overflow-x-hidden px-3 pt-1 pb-24 sm:px-4 sm:pb-6 md:p-6 md:pb-8">
+      <div className="max-w-6xl mx-auto flex flex-col gap-3 sm:gap-4">
+        <header className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/dashboard')}
+            className="min-h-[44px] -ml-1 shrink-0 rounded-xl"
+          >
+            <ChevronLeft className="w-5 h-5 mr-0.5" />
             Back
           </Button>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-gold" />
-            <h1 className="text-xl sm:text-2xl font-bold text-tx-primary">Practice Mode</h1>
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-gold shrink-0" />
+            <h1 className="text-lg sm:text-2xl font-bold text-tx-primary tracking-tight truncate">Practice Mode</h1>
           </div>
-          <span className="text-xs uppercase tracking-widest text-tx-muted font-bold">AI coach · Easy</span>
+          <span className="w-full sm:w-auto text-[10px] sm:text-xs uppercase tracking-widest text-tx-muted font-bold sm:ml-auto">
+            AI coach · Easy
+          </span>
         </header>
 
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-start">
-          <div className="w-full lg:max-w-[480px] flex flex-col gap-3 shrink-0 mx-auto lg:mx-0">
-            <div className="flex items-center justify-between bg-surface/50 p-3 rounded-2xl border border-border">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-5 lg:items-start">
+          <div className="w-full lg:max-w-[480px] flex flex-col gap-2 sm:gap-3 shrink-0 mx-auto lg:mx-0">
+            <div className="flex items-center justify-between bg-surface/80 backdrop-blur-sm p-3 rounded-2xl border border-border/90 shadow-sm">
               <GameTimer />
             </div>
-            <div className="w-full max-w-[480px] mx-auto aspect-square">
+            <div className="w-full max-w-[min(28rem,calc(100vw-1.5rem))] mx-auto aspect-square max-h-[min(85vw,28rem)] mb-1">
               <SudokuBoard />
             </div>
-            <div className="w-full flex flex-col bg-surface p-3 sm:p-4 rounded-2xl border border-border gap-3">
+            <div className="w-full flex flex-col bg-surface/90 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-border/90 shadow-md gap-2 sm:gap-3 mt-5 sm:mt-6">
               <GameControls hideWinDev />
               <NumberPad />
             </div>
           </div>
 
-          <section className="flex-1 min-h-[420px] flex flex-col bg-surface rounded-2xl border border-border overflow-hidden shadow-sm">
-            <div className="px-4 py-3 border-b border-border bg-elevated/50 flex flex-wrap gap-2">
-              <Button type="button" variant="secondary" size="sm" className="text-xs" onClick={quickAnalyze} disabled={loading}>
-                <Lightbulb className="w-4 h-4 mr-1" />
+          <section className="flex-1 min-h-[320px] sm:min-h-[380px] flex flex-col bg-surface/90 backdrop-blur-sm rounded-2xl border border-border/90 overflow-hidden shadow-md">
+            <div className="px-3 sm:px-4 py-2.5 border-b border-border/80 bg-elevated/40 flex flex-wrap gap-2">
+              <Button type="button" variant="secondary" size="sm" className="text-xs min-h-[40px] flex-1 sm:flex-none" onClick={quickAnalyze} disabled={loading}>
+                <Lightbulb className="w-4 h-4 mr-1 shrink-0" />
                 Board overview
               </Button>
-              <Button type="button" variant="secondary" size="sm" className="text-xs" onClick={quickWhy} disabled={loading}>
-                <Target className="w-4 h-4 mr-1" />
+              <Button type="button" variant="secondary" size="sm" className="text-xs min-h-[40px] flex-1 sm:flex-none" onClick={quickWhy} disabled={loading}>
+                <Target className="w-4 h-4 mr-1 shrink-0" />
                 Selected cell
               </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[280px] max-h-[min(50vh,420px)] lg:max-h-[calc(100vh-12rem)]">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 min-h-[220px] max-h-[min(42vh,380px)] sm:max-h-[min(48vh,420px)] lg:max-h-[calc(100dvh-14rem)]">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -175,7 +182,8 @@ export const LearnModePage: React.FC = () => {
             </div>
 
             <form
-              className="p-3 border-t border-border flex gap-2 bg-primary/30"
+              className="p-3 sm:p-4 border-t border-border/80 flex gap-2 bg-primary/20"
+              style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))' }}
               onSubmit={(e) => {
                 e.preventDefault();
                 void runPrompt(input);
@@ -186,10 +194,10 @@ export const LearnModePage: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask: where to place a digit, what strategy to use…"
-                className="flex-1 min-w-0 rounded-xl bg-elevated border border-border px-3 py-2.5 text-sm text-tx-primary placeholder:text-tx-muted focus:outline-none focus:ring-2 focus:ring-gold/30"
+                className="flex-1 min-w-0 rounded-xl bg-elevated border border-border px-3 py-3 min-h-[44px] text-base text-tx-primary placeholder:text-tx-muted focus:outline-none focus:ring-2 focus:ring-gold/30"
                 disabled={loading}
               />
-              <Button type="submit" variant="gold" size="sm" className="shrink-0 px-4" disabled={loading || !input.trim()}>
+              <Button type="submit" variant="gold" size="sm" className="shrink-0 min-h-[44px] min-w-[44px] px-4 rounded-xl" disabled={loading || !input.trim()}>
                 <Send className="w-4 h-4" />
               </Button>
             </form>

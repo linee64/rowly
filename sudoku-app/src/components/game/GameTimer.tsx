@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Play, Pause, Heart, Plus, Coins } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
-import { useStatsStore } from '../../store/statsStore';
 import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
 import clsx from 'clsx';
 
 export const GameTimer: React.FC = () => {
   const { elapsedTime, updateElapsedTime, isPaused, pauseGame, resumeGame, difficulty, mistakes, buyExtraLife } = useGameStore();
-  const { coins } = useStatsStore();
   const [animatingHeart, setAnimatingHeart] = useState<number | null>(null);
 
   useEffect(() => {

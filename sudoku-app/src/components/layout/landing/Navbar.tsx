@@ -22,13 +22,13 @@ const Navbar = () => {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top,0px)] ${
         isScrolled 
-          ? 'bg-landing-obsidian/80 backdrop-blur-md border-b border-landing-gold/20 py-4' 
-          : 'bg-transparent py-6'
+          ? 'bg-landing-obsidian/80 backdrop-blur-md border-b border-landing-gold/20 py-3 sm:py-4' 
+          : 'bg-transparent py-4 sm:py-6'
       }`}
     >
-      <div className="container mx-auto px-6 flex items-center justify-between">
+      <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
         {/* Logo */}
         <Link to="/" className="text-3xl font-display font-bold text-landing-gold tracking-tight">
           Rowly
@@ -59,8 +59,10 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <button 
-          className="md:hidden text-landing-gold p-2"
+          type="button"
+          className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center text-landing-gold rounded-lg active:scale-95 transition-transform"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Menu"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>

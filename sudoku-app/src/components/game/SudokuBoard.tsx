@@ -74,7 +74,7 @@ export const SudokuBoard: React.FC = () => {
                       cell.value === board[selectedCell[0]][selectedCell[1]].value;
 
     return cn(
-      'w-full h-full flex items-center justify-center text-xl sm:text-2xl transition-all cursor-pointer select-none active:scale-95 touch-manipulation relative',
+      'w-full h-full flex items-center justify-center text-lg sm:text-xl md:text-2xl font-semibold leading-none tabular-nums transition-all cursor-pointer select-none active:scale-95 touch-manipulation relative',
       cell.isGiven ? `font-bold ${skin.given}` : `font-medium ${skin.user}`,
       cell.isError && !cell.isGiven ? 'bg-error/20 text-error' : '',
       hasConflict ? 'bg-error/10 text-error' : '',
@@ -91,14 +91,14 @@ export const SudokuBoard: React.FC = () => {
 
   if (isPaused) {
     return (
-      <div className="w-full aspect-square max-w-[600px] mx-auto bg-surface border-2 border-border rounded-xl flex items-center justify-center">
+      <div className="w-full aspect-square max-w-[min(600px,calc(100vw-1.5rem))] mx-auto bg-surface border-2 border-border rounded-xl flex items-center justify-center">
         <p className="text-2xl font-bold text-tx-secondary">Game Paused</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("w-full aspect-square max-w-[600px] mx-auto border-[3px] rounded-xl overflow-hidden relative", skin.board)}>
+    <div className={cn("w-full aspect-square max-w-[min(600px,calc(100vw-1.5rem))] mx-auto border-[3px] rounded-2xl overflow-hidden relative shadow-lg shadow-black/5 dark:shadow-black/30", skin.board)}>
       <div className="grid grid-cols-9 grid-rows-9 w-full h-full">
         {board.map((row, r) =>
           row.map((cell, c) => (
@@ -114,7 +114,7 @@ export const SudokuBoard: React.FC = () => {
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
                     <div key={n} className="flex items-center justify-center">
                       {cell.notes.has(n) && (
-                        <span className="text-[11px] sm:text-xs md:text-sm text-tx-secondary font-medium leading-none">
+                        <span className="text-[8px] sm:text-[11px] md:text-sm text-tx-secondary font-medium leading-none">
                           {n}
                         </span>
                       )}

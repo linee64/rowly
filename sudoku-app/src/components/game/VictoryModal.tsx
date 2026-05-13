@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Clock, Target, AlertCircle, Share2, ArrowRight, Coins } from 'lucide-react';
+import { Trophy, Clock, Target, AlertCircle, ArrowRight, Coins } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { useStatsStore } from '../../store/statsStore';
 import { Modal } from '../ui/Modal';

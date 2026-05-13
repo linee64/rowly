@@ -34,12 +34,12 @@ export const GameControls: React.FC<{ hideWinDev?: boolean }> = ({ hideWinDev })
   ];
 
   return (
-    <div className={`grid gap-1 sm:gap-2 w-full ${hideWinDev ? 'grid-cols-5' : 'grid-cols-6'}`}>
+    <div className={`grid gap-1.5 sm:gap-2 w-full ${hideWinDev ? 'grid-cols-5' : 'grid-cols-6'}`}>
       {controls.map((ctrl, i) => (
         <Button
           key={i}
           variant="ghost"
-          className={`flex flex-col items-center justify-center p-2 sm:p-3 h-auto rounded-2xl transition-all active:scale-90 touch-manipulation relative ${
+          className={`min-h-[48px] sm:min-h-[52px] flex flex-col items-center justify-center p-1.5 sm:p-3 h-auto rounded-xl transition-all active:scale-90 touch-manipulation relative ${
             ctrl.isActive ? 'text-gold bg-gold/10' : 
             ctrl.isSpecial ? 'text-gold bg-gold/5 hover:bg-gold/10' :
             'text-tx-secondary hover:text-tx-primary hover:bg-elevated'

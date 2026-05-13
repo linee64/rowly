@@ -28,27 +28,27 @@ export const GamePage: React.FC = () => {
   if (!puzzleId) return null;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] md:min-h-screen p-2 sm:p-4 md:p-8 w-full flex flex-col items-center overflow-x-hidden">
-      <div className="w-full max-w-5xl">
-        <header className="mb-4 sm:mb-6 flex items-center">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="mr-4 -ml-2">
-            <ChevronLeft className="w-5 h-5 mr-1" />
+    <div className="min-h-0 flex-1 w-full flex flex-col items-center overflow-x-hidden px-3 pt-1 pb-2 sm:px-4 sm:py-4 md:p-8 md:min-h-[calc(100dvh-2rem)]">
+      <div className="w-full max-w-[min(36rem,100%)]">
+        <header className="mb-3 sm:mb-5 flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="min-h-[44px] -ml-1 shrink-0 rounded-xl">
+            <ChevronLeft className="w-5 h-5 mr-0.5" />
             Back
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold">Sudoku</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate">Sudoku</h1>
         </header>
 
-        <div className="flex-1 flex flex-col items-center justify-center w-full gap-4">
-          <div className="w-full max-w-[500px] flex flex-col gap-4">
-            <div className="flex items-center justify-between bg-surface/50 p-4 rounded-2xl border border-border shadow-sm">
+        <div className="flex-1 flex flex-col items-center justify-start sm:justify-center w-full gap-3 sm:gap-4 pt-2 sm:pt-0">
+          <div className="w-full max-w-[min(28rem,calc(100vw-1.5rem))] flex flex-col gap-3 sm:gap-4 mx-auto">
+            <div className="flex items-center justify-between bg-surface/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-border/90 shadow-sm">
               <GameTimer />
             </div>
             
-            <div className="w-full aspect-square flex-shrink-0">
+            <div className="w-full aspect-square flex-shrink-0 max-h-[min(85vw,28rem)] mx-auto mb-1">
               <SudokuBoard />
             </div>
 
-            <div className="w-full flex flex-col bg-surface p-4 sm:p-6 rounded-2xl border border-border shadow-sm gap-4">
+            <div className="w-full flex flex-col bg-surface/90 backdrop-blur-sm p-3 sm:p-5 rounded-2xl border border-border/90 shadow-md gap-3 sm:gap-4 mt-5 sm:mt-6">
               <GameControls />
               <NumberPad />
               <AICoachMessage />

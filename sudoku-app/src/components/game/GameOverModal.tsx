@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HeartCrack, RotateCcw, ArrowRight } from 'lucide-react';
+import { HeartCrack, RotateCcw } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';

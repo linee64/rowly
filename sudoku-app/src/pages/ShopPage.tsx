@@ -5,7 +5,7 @@ import { useStatsStore } from '../store/statsStore';
 import { Coins, Palette, Award, CheckCircle2, Plus, ShoppingBag, Briefcase, Gem, Crown, Zap, Shield, Flame } from 'lucide-react';
 import type { ShopItem } from '../types';
 import { SkinPreview } from '../components/SkinPreview';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const SHOP_ITEMS: ShopItem[] = [
   // Board Skins
@@ -29,7 +29,6 @@ const TITLE_ICONS: Record<string, any> = {
 };
 
 export const ShopPage: React.FC = () => {
-  const navigate = useNavigate();
   const { coins, ownedSkins, activeSkin, ownedTitles, activeTitle, buyItem, selectSkin, selectTitle, addCoins } = useStatsStore();
 
   const handlePurchase = (item: ShopItem) => {

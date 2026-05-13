@@ -53,8 +53,8 @@ const SudokuGrid = () => {
 
       {/* Grid container */}
       <div
-        style={{ width: 360, height: 360 }}
-        className="relative bg-[#16120a] border-2 border-landing-gold/40 shadow-[0_0_40px_rgba(207,164,48,0.15),inset_0_0_30px_rgba(0,0,0,0.5)] overflow-hidden"
+        style={{ width: 'min(360px, calc(100vw - 2.5rem))', height: 'min(360px, calc(100vw - 2.5rem))' }}
+        className="relative bg-[#16120a] border-2 border-landing-gold/40 shadow-[0_0_40px_rgba(207,164,48,0.15),inset_0_0_30px_rgba(0,0,0,0.5)] overflow-hidden mx-auto"
       >
         <div className="grid grid-cols-9 w-full h-full">
           {initialCells.map((cell, idx) => {
@@ -137,34 +137,34 @@ const SudokuGrid = () => {
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <section className="relative min-h-[100dvh] flex items-center pt-[max(5.5rem,env(safe-area-inset-top)+4rem)] pb-16 sm:pb-20 overflow-hidden">
       {/* Decorative background element */}
       <div className="absolute top-1/4 -right-20 w-96 h-96 bg-landing-gold/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-landing-gold/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="container mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
         {/* Left Column */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-7 space-y-6 sm:space-y-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-landing-gold uppercase tracking-[0.3em] text-xs font-semibold block mb-4">
+            <span className="text-landing-gold uppercase tracking-[0.3em] text-[11px] sm:text-xs font-semibold block mb-3 sm:mb-4">
               The Art of Logic
             </span>
-            <h1 className="text-6xl md:text-8xl font-display font-bold leading-tight mb-6">
+            <h1 className="text-[clamp(2.25rem,9vw,4.5rem)] sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold leading-[1.05] mb-4 sm:mb-6">
               Rowly, <br />
               <span className="text-landing-gold italic">Elevated.</span>
             </h1>
-            <p className="text-landing-cream/70 text-lg md:text-xl max-w-xl font-light leading-relaxed">
+            <p className="text-landing-cream/70 text-base sm:text-lg md:text-xl max-w-xl font-light leading-relaxed">
               Experience the timeless puzzle refined for the modern age. 
               Master the grid with high-fidelity design and precision-crafted challenges.
             </p>
           </motion.div>
 
           <motion.div 
-            className="flex flex-wrap gap-4"
+            className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}

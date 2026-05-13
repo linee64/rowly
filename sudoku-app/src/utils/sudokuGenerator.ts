@@ -1,5 +1,5 @@
 import type { CellValue, Difficulty } from '../types';
-import { solvePuzzle, countSolutions } from './sudokuSolver';
+import { countSolutions } from './sudokuSolver';
 import { isValidPlacement } from './sudokuValidator';
 
 // Simple seeded PRNG (Mulberry32)

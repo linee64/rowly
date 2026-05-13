@@ -7,8 +7,8 @@ export const StatsBar: React.FC = () => {
   const { currentStreak } = useStatsStore();
 
   return (
-    <div className="mb-8">
-      <Card className="p-4 flex items-center space-x-4 bg-surface/50 w-full md:w-1/4">
+    <div className="mb-6 sm:mb-8">
+      <Card className="p-4 sm:p-5 flex items-center gap-4 bg-gradient-to-br from-surface to-gold/[0.04] border-gold/15 w-full sm:w-auto sm:min-w-[220px] shadow-sm">
         <div className="p-3 bg-error/10 text-error rounded-lg">
           <Flame className="w-6 h-6" />
         </div>

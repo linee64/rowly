@@ -8,7 +8,7 @@ import Footer from '../components/layout/landing/Footer';
 
 const LandingPage = () => {
   return (
-    <div className="landing-body min-h-screen overflow-x-hidden">
+    <div className="landing-body min-h-[100dvh] overflow-x-hidden">
       <Navbar />
       <main className="landing-h">
         <HeroSection />

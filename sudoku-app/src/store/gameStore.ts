@@ -2,9 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Cell, CellValue, Difficulty, GameState } from '../types';
 import { generatePuzzle } from '../utils/sudokuGenerator';
-import { isValidPlacement, getErrors, isBoardComplete } from '../utils/sudokuValidator';
-import { solvePuzzle } from '../utils/sudokuSolver';
-import { explainError, explainNextMove } from '../utils/aiCoach';
+import { isBoardComplete } from '../utils/sudokuValidator';
+import { explainError } from '../utils/aiCoach';
 import { useStatsStore } from './statsStore';
 
 interface GameStore extends GameState {
