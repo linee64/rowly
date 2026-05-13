@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Zap, Trophy, Puzzle } from 'lucide-react';
+import { Play, Trophy, Sparkles, Zap } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useGameStore } from '../store/gameStore';
@@ -12,6 +12,11 @@ export const PlayMenuPage: React.FC = () => {
   const handleQuickGame = () => {
     startNewGame('medium');
     navigate('/dashboard/game');
+  };
+
+  const handleLearnAi = () => {
+    startNewGame('easy');
+    navigate('/dashboard/learn');
   };
 
   return (
@@ -45,12 +50,14 @@ export const PlayMenuPage: React.FC = () => {
         {/* Other Options */}
         <Card className="p-6 flex flex-col items-center text-center hover:border-gold/30 transition-colors group">
           <div className="w-16 h-16 rounded-2xl bg-surface border border-border flex items-center justify-center text-tx-secondary mb-4 group-hover:text-gold group-hover:border-gold/20 transition-colors">
-            <Puzzle className="w-8 h-8" />
+            <Sparkles className="w-8 h-8" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Practice Modes</h3>
-          <p className="text-tx-muted mb-6 text-sm">Select specific difficulties from Easy to Expert.</p>
-          <Button variant="secondary" className="w-full" onClick={() => navigate('/dashboard/puzzles')}>
-            Select Difficulty
+          <h3 className="text-xl font-bold mb-2">Practice Mode</h3>
+          <p className="text-tx-muted mb-6 text-sm">
+            Chat with an AI coach: board analysis, hints on what to place where, and strategy explanations.
+          </p>
+          <Button variant="secondary" className="w-full" onClick={handleLearnAi}>
+            Open practice mode
           </Button>
         </Card>
 

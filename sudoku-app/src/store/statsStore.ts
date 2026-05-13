@@ -1,7 +1,18 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
 import type { UserStats, CompletedGame, ShopItem } from '../types';
 import { supabase } from '../lib/supabase';
+import { getStatsPersistScope } from '../lib/statsPersistScope';
+import {
+  extractUserStats,
+  scheduleProfileStatsUpload,
+  flushProfileStatsNow,
+  fetchProfileStats,
+  mergeWithRemote,
+  isSupabaseConfigured,
+  readGuestStatsFromStorage,
+  clearGuestStatsStorage,
+} from '../lib/profileSync';
 
 interface StatsStore extends UserStats {
   addCompletedGame: (game: CompletedGame) => Promise<void>;
@@ -34,17 +45,36 @@ const initialStats: UserStats = {
   nameChangeCount: 0,
 };
 
+function createScopedLocalStorage(): StateStorage {
+  return {
+    getItem: (name) => {
+      const scoped = `${name}-${getStatsPersistScope()}`;
+      let raw = localStorage.getItem(scoped);
+      if (raw === null && getStatsPersistScope() === 'guest') {
+        raw = localStorage.getItem(name);
+      }
+      return raw;
+    },
+    setItem: (name, value) => {
+      localStorage.setItem(`${name}-${getStatsPersistScope()}`, value);
+    },
+    removeItem: (name) => {
+      localStorage.removeItem(`${name}-${getStatsPersistScope()}`);
+    },
+  };
+}
+
 const checkAchievements = (stats: UserStats, newGame: CompletedGame): string[] => {
   const newAchievements = new Set(stats.achievements);
-  
+
   if (!newAchievements.has('first_win')) newAchievements.add('first_win');
   if (newGame.timeSeconds < 180 && !newAchievements.has('speed_demon')) newAchievements.add('speed_demon');
   if (newGame.mistakes === 0 && !newAchievements.has('perfectionist')) newAchievements.add('perfectionist');
   if (stats.currentStreak >= 7 && !newAchievements.has('week_warrior')) newAchievements.add('week_warrior');
-  
+
   const totalGames = Object.values(stats.gamesPlayed).reduce((a, b) => a + b, 0);
   if (totalGames >= 100 && !newAchievements.has('century')) newAchievements.add('century');
-  
+
   if (newGame.hintsUsed === 0 && !newAchievements.has('hint_free')) newAchievements.add('hint_free');
   if (newGame.difficulty === 'expert' && !newAchievements.has('expert_slayer')) newAchievements.add('expert_slayer');
 
@@ -59,7 +89,7 @@ export const useStatsStore = create<StatsStore>()(
       addCompletedGame: async (game) => {
         const state = get();
         const today = new Date().toDateString();
-        
+
         let newStreak = state.currentStreak;
         if (state.lastPlayedDate !== today) {
           const yesterday = new Date();
@@ -73,14 +103,14 @@ export const useStatsStore = create<StatsStore>()(
 
         const newGamesPlayed = {
           ...state.gamesPlayed,
-          [game.difficulty]: state.gamesPlayed[game.difficulty] + 1
+          [game.difficulty]: state.gamesPlayed[game.difficulty] + 1,
         };
 
         const currentBest = state.bestTimes[game.difficulty];
         const isPersonalBest = currentBest === null || game.timeSeconds < currentBest;
         const newBestTimes = {
           ...state.bestTimes,
-          [game.difficulty]: isPersonalBest ? game.timeSeconds : currentBest
+          [game.difficulty]: isPersonalBest ? game.timeSeconds : currentBest,
         };
 
         const updatedGame = { ...game, isPersonalBest };
@@ -98,12 +128,11 @@ export const useStatsStore = create<StatsStore>()(
 
         const achievements = checkAchievements(tempState, updatedGame);
 
-        // Coin rewards based on difficulty
         const rewards = {
           easy: 50,
           medium: 100,
           hard: 150,
-          expert: 200
+          expert: 200,
         };
         const rewardAmount = rewards[game.difficulty] || 50;
 
@@ -111,16 +140,14 @@ export const useStatsStore = create<StatsStore>()(
           ...tempState,
           completedGames: [updatedGame, ...state.completedGames].slice(0, 100),
           achievements,
-          coins: state.coins + rewardAmount
+          coins: state.coins + rewardAmount,
         });
 
-        // Try inserting into Supabase
-        if (supabase) {
+        if (isSupabaseConfigured()) {
           try {
-            const displayName = state.activeTitle ? `${state.activeTitle} ${state.playerName}` : state.playerName;
-            
-            // Log for debugging
-            console.log("Syncing to leaderboard:", { displayName, time: game.timeSeconds, difficulty: game.difficulty });
+            const displayName = state.activeTitle
+              ? `${state.activeTitle} ${state.playerName}`
+              : state.playerName;
 
             const { error } = await supabase.from('leaderboard').insert([
               {
@@ -128,23 +155,28 @@ export const useStatsStore = create<StatsStore>()(
                 time_seconds: game.timeSeconds,
                 difficulty: game.difficulty,
                 avatar_url: state.avatarUrl,
-                // created_at is automatically handled by Supabase default values
-              }
+              },
             ]);
 
             if (error) throw error;
           } catch (err) {
-            console.error("Failed to insert score into supabase:", err);
+            console.error('Failed to insert score into supabase:', err);
           }
         }
+
+        scheduleProfileStatsUpload(() => extractUserStats(get()));
       },
 
-      addCoins: (amount) => set(state => ({ coins: state.coins + amount })),
+      addCoins: (amount) => {
+        set((state) => ({ coins: state.coins + amount }));
+        scheduleProfileStatsUpload(() => extractUserStats(get()));
+      },
 
       spendCoins: (amount) => {
         const state = get();
         if (state.coins >= amount) {
           set({ coins: state.coins - amount });
+          scheduleProfileStatsUpload(() => extractUserStats(get()));
           return true;
         }
         return false;
@@ -158,39 +190,124 @@ export const useStatsStore = create<StatsStore>()(
           if (state.ownedSkins.includes(item.id)) return true;
           set({
             coins: state.coins - item.price,
-            ownedSkins: [...state.ownedSkins, item.id]
+            ownedSkins: [...state.ownedSkins, item.id],
           });
+          scheduleProfileStatsUpload(() => extractUserStats(get()));
         } else if (item.type === 'title') {
           if (state.ownedTitles.includes(item.name)) return true;
           set({
             coins: state.coins - item.price,
-            ownedTitles: [...state.ownedTitles, item.name]
+            ownedTitles: [...state.ownedTitles, item.name],
           });
+          scheduleProfileStatsUpload(() => extractUserStats(get()));
         }
         return true;
       },
 
-      selectSkin: (skinId) => set({ activeSkin: skinId }),
+      selectSkin: (skinId) => {
+        set({ activeSkin: skinId });
+        scheduleProfileStatsUpload(() => extractUserStats(get()));
+      },
 
-      selectTitle: (title) => set({ activeTitle: title }),
+      selectTitle: (title) => {
+        set({ activeTitle: title });
+        scheduleProfileStatsUpload(() => extractUserStats(get()));
+      },
 
       updateProfile: (updates) => {
         const state = get();
         const newUpdates: Partial<UserStats> = { ...updates };
-        
+
         if (updates.playerName && updates.playerName !== state.playerName) {
           if (state.nameChangeCount >= 3) return false;
           newUpdates.nameChangeCount = state.nameChangeCount + 1;
         }
-        
+
         set(newUpdates);
+        scheduleProfileStatsUpload(() => extractUserStats(get()));
         return true;
       },
 
-      resetStats: () => set(initialStats)
+      resetStats: () => {
+        set(initialStats);
+        scheduleProfileStatsUpload(() => extractUserStats(get()));
+      },
     }),
     {
       name: 'sudoku-stats-storage',
+      storage: createJSONStorage(() => createScopedLocalStorage()),
+      partialize: (state) => ({
+        gamesPlayed: state.gamesPlayed,
+        bestTimes: state.bestTimes,
+        currentStreak: state.currentStreak,
+        bestStreak: state.bestStreak,
+        lastPlayedDate: state.lastPlayedDate,
+        totalHintsUsed: state.totalHintsUsed,
+        totalMistakes: state.totalMistakes,
+        completedGames: state.completedGames,
+        achievements: state.achievements,
+        coins: state.coins,
+        ownedSkins: state.ownedSkins,
+        activeSkin: state.activeSkin,
+        ownedTitles: state.ownedTitles,
+        activeTitle: state.activeTitle,
+        playerName: state.playerName,
+        avatarUrl: state.avatarUrl,
+        nameChangeCount: state.nameChangeCount,
+      }),
+      skipHydration: true,
     }
   )
 );
+
+export function applyUserStatsToStore(stats: UserStats): void {
+  useStatsStore.setState({
+    gamesPlayed: { ...stats.gamesPlayed },
+    bestTimes: { ...stats.bestTimes },
+    currentStreak: stats.currentStreak,
+    bestStreak: stats.bestStreak,
+    lastPlayedDate: stats.lastPlayedDate,
+    totalHintsUsed: stats.totalHintsUsed,
+    totalMistakes: stats.totalMistakes,
+    completedGames: stats.completedGames.map((g) => ({ ...g })),
+    achievements: [...stats.achievements],
+    coins: stats.coins,
+    ownedSkins: [...stats.ownedSkins],
+    activeSkin: stats.activeSkin,
+    ownedTitles: [...stats.ownedTitles],
+    activeTitle: stats.activeTitle,
+    playerName: stats.playerName,
+    avatarUrl: stats.avatarUrl,
+    nameChangeCount: stats.nameChangeCount,
+  });
+}
+
+export async function rehydrateStatsStore(): Promise<void> {
+  return new Promise((resolve) => {
+    const unsub = useStatsStore.persist.onFinishHydration(() => {
+      unsub();
+      resolve();
+    });
+    void useStatsStore.persist.rehydrate();
+  });
+}
+
+export async function pullRemoteProfileIntoStore(
+  userId: string,
+  opts?: { mergeGuestLocal?: boolean }
+): Promise<void> {
+  if (opts?.mergeGuestLocal) {
+    const guestStats = readGuestStatsFromStorage();
+    if (guestStats) {
+      const local = extractUserStats(useStatsStore.getState());
+      const mergedGuest = mergeWithRemote(local, guestStats);
+      applyUserStatsToStore(mergedGuest);
+      clearGuestStatsStorage();
+    }
+  }
+  const remote = await fetchProfileStats(userId);
+  const local = extractUserStats(useStatsStore.getState());
+  const merged = mergeWithRemote(local, remote);
+  applyUserStatsToStore(merged);
+  await flushProfileStatsNow(() => extractUserStats(useStatsStore.getState()));
+}

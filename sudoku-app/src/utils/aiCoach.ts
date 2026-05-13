@@ -184,3 +184,82 @@ ${boardString}
     return "Хмм, мои нейронные сети сейчас перегружены. Но я вижу, что ты справляешься! Попробуй поискать блоки 3x3, где не хватает всего пары цифр.";
   }
 };
+
+export type LearnChatTurn = { role: 'user' | 'assistant'; content: string };
+
+function boardLines(board: Cell[][]): string {
+  let s = '';
+  for (let r = 0; r < 9; r++) {
+    s += board[r].map((c) => c.value).join(' ') + '\n';
+  }
+  return s;
+}
+
+function solutionLines(solution: CellValue[][]): string {
+  let s = '';
+  for (let r = 0; r < 9; r++) {
+    s += solution[r].join(' ') + '\n';
+  }
+  return s;
+}
+
+/**
+ * Practice mode: chat with a coach that sees the board and reference solution for accurate explanations.
+ */
+export async function getGeminiLearnChatReply(
+  board: Cell[][],
+  solution: CellValue[][],
+  difficulty: string,
+  history: LearnChatTurn[],
+  userMessage: string,
+  selectedCell: [number, number] | null
+): Promise<string> {
+  if (!API_KEY) {
+    return 'Add VITE_GEMINI_API_KEY to your .env file so I can respond.';
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const sel =
+      selectedCell !== null
+        ? `Selected cell (1-based for the player: row ${selectedCell[0] + 1}, column ${selectedCell[1] + 1}).`
+        : 'No cell is selected.';
+
+    const recent = history.slice(-16);
+    const transcript = recent
+      .map((m) => `${m.role === 'user' ? 'Student' : 'Coach'}: ${m.content}`)
+      .join('\n\n');
+
+    const prompt = `You are a friendly Sudoku coach. Reply in English.
+
+Rules:
+- You see the player's current board (0 = empty) and the full solution—use the solution only to stay logically correct; do not dump the whole grid unless the student clearly asks for it.
+- Teach strategies: naked/hidden singles, intersections, 3×3 blocks, pairs/triples, etc.
+- If they ask where to play or what to do next, you may suggest ONE concrete next move in this form: "Place digit N in row R, column C (1-based)" plus 1–2 short sentences why.
+- Keep answers concise (about 120 words max).
+
+Difficulty: ${difficulty}.
+
+Current board:
+${boardLines(board)}
+
+Reference solution (for your eyes only—do not paste it wholesale to the student):
+${solutionLines(solution)}
+
+${sel}
+
+Conversation so far:
+${transcript || '(start of conversation)'}
+
+New student message: ${userMessage}
+
+Answer as the coach.`;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (error) {
+    console.error('Gemini learn chat error:', error);
+    return 'Could not reach the AI right now. Try again in a moment or check your API key.';
+  }
+}

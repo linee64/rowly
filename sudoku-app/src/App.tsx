@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -14,10 +13,13 @@ import { PlayMenuPage } from './pages/PlayMenuPage';
 import { ShopPage } from './pages/ShopPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { PaymentPage } from './pages/PaymentPage';
+import { LearnModePage } from './pages/LearnModePage';
+import { AuthProfileProvider } from './components/AuthProfileProvider';
 
 function App() {
   return (
     <BrowserRouter>
+      <AuthProfileProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -27,6 +29,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="play" element={<PlayMenuPage />} />
           <Route path="game" element={<GamePage />} />
+          <Route path="learn" element={<LearnModePage />} />
           <Route path="puzzles" element={<PuzzlesPage />} />
           <Route path="shop" element={<ShopPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />
@@ -45,10 +48,12 @@ function App() {
         <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
         <Route path="/dashboard-home" element={<Navigate to="/dashboard" replace />} />
         <Route path="/game" element={<Navigate to="/dashboard/game" replace />} />
+        <Route path="/learn" element={<Navigate to="/dashboard/learn" replace />} />
 
         {/* Catch-all redirect to home or landing */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </AuthProfileProvider>
     </BrowserRouter>
   );
 }

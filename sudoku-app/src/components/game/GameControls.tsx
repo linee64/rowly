@@ -3,34 +3,38 @@ import { Undo, Eraser, Lightbulb, Pencil, GraduationCap, Zap } from 'lucide-reac
 import { useGameStore } from '../../store/gameStore';
 import { Button } from '../ui/Button';
 
-export const GameControls: React.FC = () => {
+export const GameControls: React.FC<{ hideWinDev?: boolean }> = ({ hideWinDev }) => {
   const { undo, eraseCell, useHint, toggleNotesMode, isNotesMode, askCoach, autoCompleteForTesting } = useGameStore();
 
   const controls = [
     { icon: Undo, label: 'Undo', onClick: undo },
     { icon: Eraser, label: 'Erase', onClick: eraseCell },
-    { 
-      icon: Pencil, 
-      label: 'Notes', 
+    {
+      icon: Pencil,
+      label: 'Notes',
       onClick: toggleNotesMode,
       isActive: isNotesMode,
     },
     { icon: Lightbulb, label: 'Hint', onClick: useHint },
-    { 
-      icon: GraduationCap, 
-      label: 'Coach', 
-      onClick: askCoach,
-      isSpecial: true
-    },
     {
-      icon: Zap,
-      label: 'Win (Dev)',
-      onClick: autoCompleteForTesting,
-    }
+      icon: GraduationCap,
+      label: 'Coach',
+      onClick: askCoach,
+      isSpecial: true,
+    },
+    ...(hideWinDev
+      ? []
+      : [
+          {
+            icon: Zap,
+            label: 'Win (Dev)',
+            onClick: autoCompleteForTesting,
+          },
+        ]),
   ];
 
   return (
-    <div className="grid grid-cols-6 gap-1 sm:gap-2 w-full">
+    <div className={`grid gap-1 sm:gap-2 w-full ${hideWinDev ? 'grid-cols-5' : 'grid-cols-6'}`}>
       {controls.map((ctrl, i) => (
         <Button
           key={i}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Calendar, Zap, BookOpen } from 'lucide-react';
+import { Play, Calendar, BookOpen } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useGameStore } from '../../store/gameStore';
 import { getDailyPuzzleSeed } from '../../utils/dailyPuzzle';
@@ -19,14 +19,9 @@ export const QuickPlayCards: React.FC = () => {
     navigate('/dashboard/game');
   };
 
-  const handlePractice = () => {
+  const handlePracticeLearn = () => {
     startNewGame('easy');
-    navigate('/dashboard/game');
-  };
-
-  const handleSpeedRun = () => {
-    startNewGame('easy');
-    navigate('/dashboard/game');
+    navigate('/dashboard/learn');
   };
 
   const cards = [
@@ -48,24 +43,16 @@ export const QuickPlayCards: React.FC = () => {
     },
     {
       title: 'Practice Mode',
-      desc: 'Relaxed, Easy difficulty',
+      desc: 'AI chat coach: board analysis, moves, and strategies',
       icon: BookOpen,
       color: 'bg-elevated hover:bg-border text-tx-primary',
       iconColor: 'text-success',
-      onClick: handlePractice,
-    },
-    {
-      title: 'Speed Run',
-      desc: 'Race against the clock',
-      icon: Zap,
-      color: 'bg-elevated hover:bg-border text-tx-primary',
-      iconColor: 'text-error',
-      onClick: handleSpeedRun,
+      onClick: handlePracticeLearn,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
       {cards.map((card, i) => (
         <Card 
           key={i} 
